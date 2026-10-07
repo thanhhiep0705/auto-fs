@@ -12,9 +12,15 @@ AutoFS.exporter = {
       throw new Error('Thư viện XLSX chưa được tải. Hãy kiểm tra kết nối mạng.');
     }
 
-    const worksheet = XLSX.utils.json_to_sheet(exportRows, {
-      header: headers
-    });
+    let worksheet;
+    if (Array.isArray(exportRows) && Array.isArray(exportRows[0])) {
+      worksheet = XLSX.utils.aoa_to_sheet(exportRows);
+    } else {
+      worksheet = XLSX.utils.json_to_sheet(exportRows, {
+        header: headers
+      });
+    }
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
     return workbook;
@@ -36,6 +42,14 @@ AutoFS.exporter = {
    */
   writeExcel(exportRows, fileName = 'Flash Sale.xlsx', sheetName = 'Flash Sale', headers) {
     const workbook = this.createWorkbook(exportRows, sheetName, headers);
+    XLSX.writeFile(workbook, fileName);
+  },
+
+  /**
+   * Save 2D Array workbook directly as .xlsx file
+   */
+  writeExcelAOA(aoaData, fileName = 'Template FS Shopee.xlsx', sheetName = 'Template FS Shopee') {
+    const workbook = this.createWorkbook(aoaData, sheetName);
     XLSX.writeFile(workbook, fileName);
   },
 

@@ -36,6 +36,67 @@ AutoFS.portalFs = {
     'Giới hạn mua hàng'
   ],
 
+  // Exact 3 Header Rows matching tab 'Template FS Shopee'
+  TEMPLATE_HEADER_ROWS: [
+    // Dòng 1: Tên các cột
+    [
+      'Tên sản phẩm',
+      'Mã sản phẩm',
+      'Tên hiển thị sản phẩm',
+      'Tên phân loại hàng',
+      'Mã phân loại hàng',
+      'Ngành hàng',
+      'Ngành hàng con',
+      'Ngành hàng cấp 3',
+      'Doanh số',
+      'Giá Gốc',
+      'Giá đang hiển thị',
+      'Giá khuyến mãi',
+      'Giá khuyến mãi được đề xuất',
+      'Kho hàng',
+      'Kho hàng dự trữ cho khuyến mãi',
+      'Giới hạn mua hàng'
+    ],
+    // Dòng 2: Phân loại bắt buộc / không bắt buộc
+    [
+      'Không bắt buộc',
+      'Bắt buộc',
+      'Bắt buộc',
+      'Không bắt buộc',
+      'Bắt buộc',
+      'Không bắt buộc',
+      'Không bắt buộc',
+      'Không bắt buộc',
+      'Không bắt buộc',
+      'Không bắt buộc',
+      'Để trưng bày',
+      'Bắt buộc (Discount 3%)',
+      'Không bắt buộc',
+      'Không bắt buộc',
+      'Bắt buộc',
+      'Bắt buộc'
+    ],
+    // Dòng 3: Mô tả chi tiết cho từng cột
+    [
+      'Tên các sản phẩm khả dụng tham gia Khung giờ của chương trình',
+      'Điền chính xác mã sản phẩm tham gia Khung giờ của chương trình',
+      'Tên hiển thị sản phẩm sẽ được hiển thị trên Flash Sale sau khi sản phẩm được xét duyệt thành công',
+      'Tên các phân loại hàng khả dụng tham gia Khung giờ của chương trình',
+      'Điền chính xác mã phân loại hàng tham gia Khung giờ của chương trình',
+      'Tên ngành hàng trong Hướng dẫn về ngành hàng Shopee',
+      'Tên ngành hàng con trong Hướng dẫn về ngành hàng Shopee',
+      'Tên ngành hàng cấp 3 trong Hướng dẫn về ngành hàng Shopee',
+      'Doanh số tương ứng với phân loại hàng của sản phẩm',
+      'Giá cuối cùng sau Thuế hiển thị với Người mua',
+      'Giá đang hiển thị tới người mua',
+      'Hãy điền giá khuyến mãi mong muốn chạy chương trình. Ưu đãi càng cao, khả năng được phê duyệt tham gia chương trình và tăng doanh số càng lớn',
+      'Giá khuyến mãi của phân loại hàng được đề xuất bởi hệ thống',
+      'Kho hàng được điền ở đây là số lượng hàng hóa trong kho sẽ hiển thị cho Người mua thấy',
+      'Điền số lượng hàng hóa khuyến mãi mà bạn muốn dự trữ để tham gia Khung giờ của chương trình này. Hãy luôn đảm bảo kho đủ hàng cho chương trình khuyến mãi, số lượng hàng khuyến mãi bán ra sẽ trừ dần vào tổng kho hàng của sản phẩm cho đến khi Khung giờ của chương trình kết thúc',
+      'Số lượng sản phẩm tối đa Người mua có thể mua trong Chương trình giảm giá. \n Lưu ý: Nếu giới hạn mua bằng 0 hoặc để trống, hệ thống sẽ xác nhận giới hạn mua là "Không giới hạn"'
+    ]
+  ],
+
   init() {
     this.cacheElements();
     this.bindEvents();
@@ -422,34 +483,37 @@ AutoFS.portalFs = {
 
     try {
       this.setStatus('Đang tạo file Excel...', '');
-      // Chuẩn hóa dữ liệu theo đúng chuẩn 16 cột của Template FS Shopee
-      const exportData = rows.map(row => ({
-        'Tên sản phẩm': row['Tên sản phẩm'] || '',
-        'Mã sản phẩm': String(row['Mã sản phẩm'] || ''),
-        'Tên hiển thị sản phẩm': row['Tên hiển thị sản phẩm'] || '',
-        'Tên phân loại hàng': row['Tên phân loại hàng'] || '',
-        'Mã phân loại hàng': String(row['Mã phân loại hàng'] || ''),
-        'Ngành hàng': '',
-        'Ngành hàng con': '',
-        'Ngành hàng cấp 3': '',
-        'Doanh số': row['Doanh số'] !== '' ? Number(row['Doanh số']) || '' : '',
-        'Giá Gốc': '',
-        'Giá đang hiển thị': Number(row['Giá đang hiển thị']) || 0,
-        'Giá khuyến mãi': Number(row['Giá khuyến mãi']) || 0,
-        'Giá khuyến mãi được đề xuất': '',
-        'Kho hàng': row['Kho hàng'] !== '' ? Number(row['Kho hàng']) || '' : '',
-        'Kho hàng dự trữ cho khuyến mãi': Number(row['Kho hàng dự trữ cho khuyến mãi']) || 0,
-        'Giới hạn mua hàng': Number(row['Giới hạn mua hàng']) || 0
-      }));
+      
+      // Tạo dữ liệu dạng ma trận hàng (AOA): 3 dòng đầu giữ nguyên từ Template, các dòng tiếp theo là sản phẩm phù hợp
+      const aoaData = [
+        ...this.TEMPLATE_HEADER_ROWS,
+        ...rows.map(row => [
+          row['Tên sản phẩm'] || '',
+          String(row['Mã sản phẩm'] || ''),
+          row['Tên hiển thị sản phẩm'] || '',
+          row['Tên phân loại hàng'] || '',
+          String(row['Mã phân loại hàng'] || ''),
+          row['Ngành hàng'] || '',
+          row['Ngành hàng con'] || '',
+          row['Ngành hàng cấp 3'] || '',
+          row['Doanh số'] !== '' && row['Doanh số'] !== undefined ? (Number(row['Doanh số']) || '') : '',
+          row['Giá Gốc'] || '',
+          Number(row['Giá đang hiển thị']) || 0,
+          Number(row['Giá khuyến mãi']) || 0,
+          row['Giá khuyến mãi được đề xuất'] || '',
+          row['Kho hàng'] !== '' && row['Kho hàng'] !== undefined ? (Number(row['Kho hàng']) || '') : '',
+          Number(row['Kho hàng dự trữ cho khuyến mãi']) || 0,
+          Number(row['Giới hạn mua hàng']) || 0
+        ])
+      ];
 
       const timeStamp = AutoFS.helpers.getFileTimeStamp();
       const fileName = `Template FS Shopee ${timeStamp}.xlsx`;
 
-      AutoFS.exporter.writeExcel(
-        exportData,
+      AutoFS.exporter.writeExcelAOA(
+        aoaData,
         fileName,
-        'Template FS Shopee',
-        this.TEMPLATE_COLUMNS
+        'Template FS Shopee'
       );
 
       this.setStatus(`Đã tải file thành công: ${fileName}`, 'ok');
