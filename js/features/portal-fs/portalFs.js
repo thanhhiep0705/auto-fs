@@ -231,10 +231,9 @@ AutoFS.portalFs = {
             if (this.deletedVariantIds.has(variant.variantId)) return false;
             // Stock check
             if (variant.totalInventory < config.minStock) return false;
-            // % LM growth check (lọc model có % giảm đạt yêu cầu, e.g. nhập 10 hoặc -10 thì lmGrowth <= -10)
+            // % LM growth check (Lấy model có % tăng trưởng LM <= mức người dùng nhập)
             if (config.minLmPercent !== null && variant.lmGrowth !== null && variant.lmGrowth !== undefined) {
-              const threshold = config.minLmPercent > 0 ? -config.minLmPercent : config.minLmPercent;
-              if (variant.lmGrowth > threshold) return false;
+              if (variant.lmGrowth > config.minLmPercent) return false;
             }
             return true;
           })
