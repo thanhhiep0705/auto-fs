@@ -5,9 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Auto FS - Flash Sale Generator</title>
   <link rel="stylesheet" href="styles.css">
+  
+  <!-- External Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="app.js" defer></script>
+
+  <!-- Modular Scripts -->
+  <script src="js/config.js" defer></script>
+  <script src="js/utils/helpers.js" defer></script>
+  <script src="js/utils/sampler.js" defer></script>
+  <script src="js/utils/storage.js" defer></script>
+  <script src="js/services/googleSheet.js" defer></script>
+  <script src="js/services/exporter.js" defer></script>
+  <script src="js/features/shop-fs/shopFs.js" defer></script>
+  <script src="js/features/portal-fs/portalFs.js" defer></script>
+  <script src="js/tabs.js" defer></script>
+  <script src="js/app.js" defer></script>
 </head>
 <body>
   <main>
@@ -19,14 +32,27 @@
           <small>Flash Sale Generator</small>
         </span>
       </a>
+
+      <!-- Navigation Tabs -->
+      <nav class="tabs" role="tablist" aria-label="Flash Sale Types">
+        <button id="tabShopFs" class="tab-button active" role="tab" data-tab="shopFsPanel" aria-selected="true" aria-controls="shopFsPanel">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          FS của Shop
+        </button>
+        <button id="tabPortalFs" class="tab-button" role="tab" data-tab="portalFsPanel" aria-selected="false" aria-controls="portalFsPanel">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          FS Cổng Shopee
+        </button>
+      </nav>
     </header>
 
-    <section id="autoFsPanel" class="tab-panel active" role="tabpanel">
+    <!-- TAB 1: Flash Sale của Shop -->
+    <section id="shopFsPanel" class="tab-panel active" role="tabpanel" aria-labelledby="tabShopFs">
       <div class="page-heading">
         <div>
-          <span class="eyebrow">FLASH SALE GENERATOR</span>
-          <h1>Tạo File Flash Sale</h1>
-          <p>Chọn sản phẩm theo từng khoảng xếp hạng và xuất file Flash Sale sẵn sàng sử dụng.</p>
+          <span class="eyebrow">FLASH SALE CỦA SHOP</span>
+          <h1>Tạo File Flash Sale Shop</h1>
+          <p>Chọn sản phẩm theo từng khoảng xếp hạng và xuất file Flash Sale của Shop theo định dạng chuẩn.</p>
         </div>
         <button id="refreshAutoFsBtn" class="refresh-button" type="button">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6v5h-5M4 18v-5h5M18.5 9A7 7 0 0 0 6.8 6.4L4 11m16 2-2.8 4.6A7 7 0 0 1 5.5 15"/></svg>
@@ -150,6 +176,174 @@
           </div>
         </aside>
       </div>
+    </section>
+
+    <!-- TAB 2: Flash Sale Cổng Shopee -->
+    <section id="portalFsPanel" class="tab-panel" role="tabpanel" aria-labelledby="tabPortalFs">
+      <div class="page-heading">
+        <div>
+          <span class="eyebrow">FLASH SALE CỔNG SHOPEE</span>
+          <h1>Tạo File Flash Sale Cổng Shopee</h1>
+          <p>Lọc sản phẩm theo khoảng top, tỷ lệ % LM, tồn kho tối thiểu và cấu hình giá để xuất file đề cử chiến dịch cổng Shopee.</p>
+        </div>
+        <button id="refreshPortalFsBtn" class="refresh-button" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6v5h-5M4 18v-5h5M18.5 9A7 7 0 0 0 6.8 6.4L4 11m16 2-2.8 4.6A7 7 0 0 1 5.5 15"/></svg>
+          Làm mới dữ liệu
+        </button>
+      </div>
+
+      <!-- Khung Cấu hình: Bước 1 & Bước 2 nằm trên cùng 1 hàng -->
+      <div class="portal-setup-grid">
+        <!-- BƯỚC 1: Tiêu chí lọc sản phẩm -->
+        <section class="panel" aria-label="Tiêu chí lọc sản phẩm">
+          <div class="panel-heading">
+            <div>
+              <span class="step-label">BƯỚC 1</span>
+              <h2>Tiêu chí lọc sản phẩm (SKU & Model)</h2>
+            </div>
+            <span class="panel-note">Cấu hình được tự động lưu</span>
+          </div>
+
+          <div class="portal-filter-grid">
+            <div class="field">
+              <label for="portalTopFrom">Từ top SKU</label>
+              <input id="portalTopFrom" type="number" min="1" step="1" value="1">
+              <small>Bắt đầu từ thứ hạng</small>
+            </div>
+
+            <div class="field">
+              <label for="portalTopTo">Đến top SKU</label>
+              <input id="portalTopTo" type="number" min="1" step="1" value="50" placeholder="Không giới hạn">
+              <small>Để trống nếu không giới hạn</small>
+            </div>
+
+            <div class="field">
+              <label for="portalSkuCount">Số lượng SKU cần lấy (Random)</label>
+              <div class="input-with-suffix">
+                <input id="portalSkuCount" type="number" min="1" step="1" placeholder="Tất cả hoặc VD: 3">
+                <span>SKU</span>
+              </div>
+              <small>Nhập số lượng để random, hoặc để trống để lấy tất cả</small>
+            </div>
+
+            <div class="field">
+              <label for="portalMinLmPercent">% LM tối thiểu (Model)</label>
+              <div class="input-with-suffix">
+                <input id="portalMinLmPercent" type="number" step="1" placeholder="VD: -20">
+                <span>%</span>
+              </div>
+              <small>Lọc model có % tăng trưởng giảm đạt mức này</small>
+            </div>
+
+            <div class="field">
+              <label for="portalMinStock">Tồn kho tối thiểu (Min Stock)</label>
+              <div class="input-with-suffix">
+                <input id="portalMinStock" type="number" min="0" step="1" value="100">
+                <span>sản phẩm</span>
+              </div>
+              <small>Chỉ lấy model đạt ngưỡng tồn kho</small>
+            </div>
+          </div>
+        </section>
+
+        <!-- BƯỚC 2: Cấu hình Khuyến mãi & Giới hạn -->
+        <section class="panel" aria-label="Cấu hình Khuyến mãi & Giới hạn">
+          <div class="panel-heading">
+            <div>
+              <span class="step-label">BƯỚC 2</span>
+              <h2>Cấu hình Khuyến mãi & Giới hạn</h2>
+            </div>
+          </div>
+
+          <div class="portal-config-grid">
+            <div class="field">
+              <label for="portalPriceType">Cách tính Giá Khuyến Mãi</label>
+              <select id="portalPriceType" class="select-input">
+                <option value="percent">% Giảm giá (Chiết khấu)</option>
+                <option value="fixed">Điều chỉnh số tiền cố định (₫)</option>
+              </select>
+              <small>Áp dụng giảm trên giá đang hiển thị</small>
+            </div>
+
+            <div class="field">
+              <label for="portalPriceValue">Mức giảm giá</label>
+              <div class="input-with-suffix">
+                <input id="portalPriceValue" type="number" step="1" value="0" placeholder="0">
+                <span id="portalPriceSuffix">%</span>
+              </div>
+              <small>Nhập % giảm hoặc số tiền (VD: -10000)</small>
+            </div>
+
+            <div class="field">
+              <label for="portalCampaignStock">Kho hàng dự trữ cho KM</label>
+              <div class="input-with-suffix">
+                <input id="portalCampaignStock" type="number" min="1" step="1" value="10">
+                <span>sản phẩm</span>
+              </div>
+              <small>Số sản phẩm tối đa bán trong khung giờ</small>
+            </div>
+
+            <div class="field">
+              <label for="portalPurchaseLimit">Giới hạn mua hàng</label>
+              <div class="input-with-suffix">
+                <input id="portalPurchaseLimit" type="number" min="0" step="1" value="0">
+                <span>sản phẩm</span>
+              </div>
+              <small>Số lượng tối đa 1 khách có thể mua (0: không giới hạn)</small>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- BƯỚC 3: Bảng Preview Dữ liệu & Nút Tải File nằm cạnh nút Random -->
+      <section class="panel preview-section" aria-label="Bảng xem trước dữ liệu">
+        <div class="panel-heading preview-header-flex">
+          <div class="preview-title-wrap">
+            <span class="step-label">BƯỚC 3</span>
+            <h2>Xem trước dữ liệu xuất</h2>
+            <div id="portalPreviewCount" class="preview-count-inline">Đang tải dữ liệu...</div>
+          </div>
+
+          <!-- Các nút thao tác: Random lại & Tải file đặt cạnh nhau -->
+          <div class="preview-action-group">
+            <button id="randomPortalFsQuickBtn" class="refresh-button" type="button" title="Đổi sang bộ SKU ngẫu nhiên khác">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6v5h-5M4 18v-5h5M18.5 9A7 7 0 0 0 6.8 6.4L4 11m16 2-2.8 4.6A7 7 0 0 1 5.5 15"/></svg>
+              Random bộ SKU khác
+            </button>
+            <button id="downloadPortalFsBtn" class="primary-download-btn" type="button" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M5 20h14"/></svg>
+              Tải File Template FS Shopee
+            </button>
+          </div>
+        </div>
+
+        <div id="portalStatus" class="status" role="status" aria-live="polite"></div>
+
+        <div id="portalPreviewContainer" class="preview">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 45px;">STT</th>
+                <th>Mã sản phẩm</th>
+                <th style="min-width: 250px;">Tên hiển thị sản phẩm</th>
+                <th>Mã phân loại</th>
+                <th>Tên phân loại hàng</th>
+                <th style="text-align: right;">Giá hiển thị</th>
+                <th style="text-align: right;">Giá khuyến mãi</th>
+                <th style="text-align: right;">Tồn kho</th>
+                <th style="text-align: right;">Kho dự trữ KM</th>
+                <th style="text-align: right;">Giới hạn mua</th>
+                <th style="text-align: center; width: 60px;">Xóa</th>
+              </tr>
+            </thead>
+            <tbody id="portalPreviewBody">
+              <tr>
+                <td colspan="11" class="empty-cell">Đang tải dữ liệu...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </section>
   </main>
 </body>
