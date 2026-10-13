@@ -70,7 +70,7 @@ AutoFS.portalFs = {
       'Không bắt buộc',
       'Không bắt buộc',
       'Để trưng bày',
-      'Bắt buộc (Discount 3%)',
+      'Bắt buộc',
       'Không bắt buộc',
       'Không bắt buộc',
       'Bắt buộc',
@@ -80,7 +80,7 @@ AutoFS.portalFs = {
     [
       'Tên các sản phẩm khả dụng tham gia Khung giờ của chương trình',
       'Điền chính xác mã sản phẩm tham gia Khung giờ của chương trình',
-      'Tên hiển thị sản phẩm sẽ được hiển thị trên Flash Sale sau khi sản phẩm được xét duyệt thành công',
+      ' \nTên hiển thị sản phẩm sẽ được hiển thị trên Flash Sale sau khi sản phẩm được xét duyệt thành công      ',
       'Tên các phân loại hàng khả dụng tham gia Khung giờ của chương trình',
       'Điền chính xác mã phân loại hàng tham gia Khung giờ của chương trình',
       'Tên ngành hàng trong Hướng dẫn về ngành hàng Shopee',
@@ -93,7 +93,7 @@ AutoFS.portalFs = {
       'Giá khuyến mãi của phân loại hàng được đề xuất bởi hệ thống',
       'Kho hàng được điền ở đây là số lượng hàng hóa trong kho sẽ hiển thị cho Người mua thấy',
       'Điền số lượng hàng hóa khuyến mãi mà bạn muốn dự trữ để tham gia Khung giờ của chương trình này. Hãy luôn đảm bảo kho đủ hàng cho chương trình khuyến mãi, số lượng hàng khuyến mãi bán ra sẽ trừ dần vào tổng kho hàng của sản phẩm cho đến khi Khung giờ của chương trình kết thúc',
-      'Số lượng sản phẩm tối đa Người mua có thể mua trong Chương trình giảm giá. \n Lưu ý: Nếu giới hạn mua bằng 0 hoặc để trống, hệ thống sẽ xác nhận giới hạn mua là "Không giới hạn"'
+      'Số lượng sản phẩm tối đa Người mua có thể mua trong Chương trình giảm giá. \nLưu ý: Nếu giới hạn mua bằng 0 hoặc để trống, hệ thống sẽ xác nhận giới hạn mua là "Không giới hạn"'
     ]
   ],
 
@@ -488,32 +488,32 @@ AutoFS.portalFs = {
       const aoaData = [
         ...this.TEMPLATE_HEADER_ROWS,
         ...rows.map(row => [
-          row['Tên sản phẩm'] || '',
+          String(row['Tên sản phẩm'] || ''),
           String(row['Mã sản phẩm'] || ''),
-          row['Tên hiển thị sản phẩm'] || '',
-          row['Tên phân loại hàng'] || '',
+          String(row['Tên hiển thị sản phẩm'] || ''),
+          String(row['Tên phân loại hàng'] || ''),
           String(row['Mã phân loại hàng'] || ''),
-          row['Ngành hàng'] || '',
-          row['Ngành hàng con'] || '',
-          row['Ngành hàng cấp 3'] || '',
-          row['Doanh số'] !== '' && row['Doanh số'] !== undefined ? (Number(row['Doanh số']) || '') : '',
-          row['Giá Gốc'] || '',
-          Number(row['Giá đang hiển thị']) || 0,
-          Number(row['Giá khuyến mãi']) || 0,
-          row['Giá khuyến mãi được đề xuất'] || '',
-          row['Kho hàng'] !== '' && row['Kho hàng'] !== undefined ? (Number(row['Kho hàng']) || '') : '',
-          Number(row['Kho hàng dự trữ cho khuyến mãi']) || 0,
-          Number(row['Giới hạn mua hàng']) || 0
+          String(row['Ngành hàng'] || ''),
+          String(row['Ngành hàng con'] || ''),
+          String(row['Ngành hàng cấp 3'] || ''),
+          row['Doanh số'] !== '' && row['Doanh số'] !== undefined ? String(row['Doanh số']) : '0',
+          String(row['Giá Gốc'] || ''),
+          String(row['Giá đang hiển thị'] || '0'),
+          String(row['Giá khuyến mãi'] || '0'),
+          String(row['Giá khuyến mãi được đề xuất'] || ''),
+          String(row['Kho hàng'] !== '' && row['Kho hàng'] !== undefined ? row['Kho hàng'] : '0'),
+          String(row['Kho hàng dự trữ cho khuyến mãi'] !== '' && row['Kho hàng dự trữ cho khuyến mãi'] !== undefined ? row['Kho hàng dự trữ cho khuyến mãi'] : '0'),
+          String(row['Giới hạn mua hàng'] !== '' && row['Giới hạn mua hàng'] !== undefined ? row['Giới hạn mua hàng'] : '0')
         ])
       ];
 
       const timeStamp = AutoFS.helpers.getFileTimeStamp();
-      const fileName = `Template FS Shopee ${timeStamp}.xlsx`;
+      const fileName = `Template_FS_Shopee_${timeStamp}_eligible_Product_list.xlsx`;
 
       AutoFS.exporter.writeExcelAOA(
         aoaData,
         fileName,
-        'Template FS Shopee'
+        'Sheet1'
       );
 
       this.setStatus(`Đã tải file thành công: ${fileName}`, 'ok');

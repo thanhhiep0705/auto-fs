@@ -46,11 +46,42 @@ AutoFS.exporter = {
   },
 
   /**
-   * Save 2D Array workbook directly as .xlsx file
+   * Save 2D Array workbook directly as .xlsx file matching Shopee Portal template format
    */
-  writeExcelAOA(aoaData, fileName = 'Template FS Shopee.xlsx', sheetName = 'Template FS Shopee') {
+  writeExcelAOA(aoaData, fileName = 'eligible_Product_list.xlsx', sheetName = 'Sheet1') {
     const workbook = this.createWorkbook(aoaData, sheetName);
-    XLSX.writeFile(workbook, fileName);
+    const worksheet = workbook.Sheets[sheetName];
+
+    if (worksheet) {
+      // Ensure cells have correct string formatting matching Shopee Portal specs
+      for (const cellRef of Object.keys(worksheet)) {
+        if (cellRef.startsWith('!')) continue;
+        const cell = worksheet[cellRef];
+        if (!cell || cell.v === undefined || cell.v === null) continue;
+
+        // Header rows (rows 1, 2, 3) are always strings
+        const rowNum = parseInt(cellRef.replace(/^[A-Z]+/, ''), 10);
+        if (rowNum <= 3) {
+          cell.t = 's';
+          cell.v = String(cell.v);
+        } else {
+          // Column I (Doanh số) can be numeric 0
+          if (cellRef.startsWith('I')) {
+            cell.t = 'n';
+            cell.v = Number(cell.v) || 0;
+          } else {
+            // All other columns (IDs, product names, prices, stocks, limits) must be formatted as strings
+            cell.t = 's';
+            cell.v = String(cell.v);
+          }
+        }
+      }
+    }
+
+    XLSX.writeFile(workbook, fileName, {
+      bookType: 'xlsx',
+      bookSST: true
+    });
   },
 
   /**

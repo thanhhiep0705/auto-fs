@@ -1,0 +1,7 @@
+# Excel and archive test files
+*.xlsx
+*.zip
+
+# OS files
+.DS_Store
+Thumbs.db
